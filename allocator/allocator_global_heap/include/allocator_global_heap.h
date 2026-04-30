@@ -23,7 +23,7 @@ public:
     ~allocator_global_heap() override = default;
     
     allocator_global_heap(
-        allocator_global_heap const &other) = default;
+        allocator_global_heap const &other) = delete;
     
     allocator_global_heap &operator=(
         allocator_global_heap const &other) = delete;
@@ -32,7 +32,8 @@ public:
         allocator_global_heap &&other) noexcept = delete;
     
     allocator_global_heap &operator=(
-        allocator_global_heap &&other) noexcept = delete;
+        allocator_global_heap &&
+        other) noexcept = delete;
 
 private:
     
