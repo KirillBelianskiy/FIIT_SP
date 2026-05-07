@@ -15,34 +15,33 @@ class allocator_boundary_tags final :
 
 private:
 
-    static constexpr const size_t allocator_metadata_size = sizeof(memory_resource*) + sizeof(allocator_with_fit_mode::fit_mode) +
+    static constexpr const size_t allocator_metadata_size = sizeof(allocator_with_fit_mode::fit_mode) +
                                                             sizeof(size_t) + sizeof(std::mutex) + sizeof(void*);
 
-    static constexpr const size_t occupied_block_metadata_size = sizeof(size_t) + sizeof(void*) + sizeof(void*) + sizeof(void*);
+    static constexpr const size_t occupied_block_metadata_size = sizeof(size_t) + sizeof(bool) + sizeof(void*) + sizeof(void*);
 
-    static constexpr const size_t free_block_metadata_size = 0;
+    static constexpr const size_t free_block_metadata_size = sizeof(size_t) + sizeof(void*) + sizeof(void*) + sizeof(void*) + sizeof(size_t);
 
     void *_trusted_memory;
 
 public:
-    
+
     ~allocator_boundary_tags() override;
-    
+
     allocator_boundary_tags(allocator_boundary_tags const &other);
-    
+
     allocator_boundary_tags &operator=(allocator_boundary_tags const &other);
-    
+
     allocator_boundary_tags(
         allocator_boundary_tags &&other) noexcept;
-    
+
     allocator_boundary_tags &operator=(
         allocator_boundary_tags &&other) noexcept;
 
 public:
-    
+
     explicit allocator_boundary_tags(
             size_t space_size,
-            std::pmr::memory_resource *parent_allocator = nullptr,
             allocator_with_fit_mode::fit_mode allocate_fit_mode = allocator_with_fit_mode::fit_mode::first_fit);
 
 private:
@@ -92,9 +91,9 @@ private:
 
         boundary_iterator& operator--() & noexcept;
 
-        boundary_iterator operator++(int n);
+        boundary_iterator operator++(int);
 
-        boundary_iterator operator--(int n);
+        boundary_iterator operator--(int);
 
         size_t size() const noexcept;
 
