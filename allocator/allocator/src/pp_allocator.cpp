@@ -12,7 +12,12 @@ void smart_mem_resource::do_deallocate(void *p, size_t, size_t)
 
 void *smart_mem_resource::do_allocate(size_t _Bytes, size_t _Align)
 {
-    return do_allocate_sm(_Bytes);
+    return do_allocate_sm(_Bytes, _Align);
+}
+
+void *smart_mem_resource::do_allocate_sm(size_t n, size_t)
+{
+    return do_allocate_sm(n);
 }
 
 void *test_mem_resource::do_allocate_sm(size_t n)

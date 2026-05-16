@@ -50,7 +50,10 @@ private:
      * TODO: You must improve it for alignment support
      */
 
-    static constexpr const size_t allocator_metadata_size = sizeof(allocator_dbg_helper*) + sizeof(fit_mode) + sizeof(unsigned char) + sizeof(std::mutex);
+    static constexpr const size_t allocator_metadata_size = sizeof(fit_mode) + sizeof(unsigned char) +
+        ((sizeof(fit_mode) + sizeof(unsigned char) + alignof(std::mutex) - 1) & ~(alignof(std::mutex) - 1)) -
+        (sizeof(fit_mode) + sizeof(unsigned char)) +
+        sizeof(std::mutex) + sizeof(size_t);
 
     static constexpr const size_t occupied_block_metadata_size = sizeof(block_metadata) + sizeof(void*);
 
@@ -62,38 +65,38 @@ public:
 
     explicit allocator_buddies_system(
             size_t space_size_power_of_two,
-            std::pmr::memory_resource *parent_allocator = nullptr,
             allocator_with_fit_mode::fit_mode allocate_fit_mode = allocator_with_fit_mode::fit_mode::first_fit);
 
     allocator_buddies_system(
         allocator_buddies_system const &other);
-    
+
     allocator_buddies_system &operator=(
         allocator_buddies_system const &other);
-    
+
     allocator_buddies_system(
         allocator_buddies_system &&other) noexcept;
-    
+
     allocator_buddies_system &operator=(
         allocator_buddies_system &&other) noexcept;
 
     ~allocator_buddies_system() override;
 
+public:
+
+    void set_fit_mode(
+        allocator_with_fit_mode::fit_mode mode) override;
+
+    std::vector<allocator_test_utils::block_info> get_blocks_info() const noexcept override;
+
 private:
-    
+
     [[nodiscard]] void *do_allocate_sm(
         size_t size) override;
-    
+
     void do_deallocate_sm(
         void *at) override;
 
     bool do_is_equal(const std::pmr::memory_resource& other) const noexcept override;
-
-    inline void set_fit_mode(
-        allocator_with_fit_mode::fit_mode mode) override;
-
-
-    std::vector<allocator_test_utils::block_info> get_blocks_info() const noexcept override;
 
 private:
 
@@ -104,6 +107,8 @@ private:
     class buddy_iterator
     {
         void* _block;
+        void* _memory_start;
+        size_t _total_size;
 
     public:
 
@@ -119,7 +124,7 @@ private:
 
         buddy_iterator& operator++() & noexcept;
 
-        buddy_iterator operator++(int n);
+        buddy_iterator operator++(int);
 
         size_t size() const noexcept;
 
@@ -130,6 +135,8 @@ private:
         buddy_iterator();
 
         buddy_iterator(void* start);
+
+        buddy_iterator(void* start, void* memory_start, size_t total_size);
     };
 
     friend class buddy_iterator;
@@ -137,7 +144,7 @@ private:
     buddy_iterator begin() const noexcept;
 
     buddy_iterator end() const noexcept;
-    
+
 };
 
 #endif //MATH_PRACTICE_AND_OPERATING_SYSTEMS_ALLOCATOR_ALLOCATOR_BUDDIES_SYSTEM_H

@@ -5,22 +5,22 @@
 
 TEST(allocatorSortedListPositiveTests, test1)
 {
-    std::unique_ptr<smart_mem_resource> alloc(new allocator_sorted_list(3000, nullptr, allocator_with_fit_mode::fit_mode::first_fit));
-    
+    std::unique_ptr<smart_mem_resource> alloc(new allocator_sorted_list(3000, allocator_with_fit_mode::fit_mode::first_fit));
+
     auto first_block = reinterpret_cast<int *>(alloc->allocate(sizeof(int) * 250));
-    
+
     auto second_block = reinterpret_cast<char *>(alloc->allocate(sizeof(int) * 250));
     alloc->deallocate(first_block, 1);
-    
+
     first_block = reinterpret_cast<int *>(alloc->allocate(sizeof(int) * 245));
-    
+
     alloc->deallocate(second_block, 1);
     alloc->deallocate(first_block, 1);
 }
 
 TEST(allocatorSortedListPositiveTests, test2)
 {
-    std::unique_ptr<smart_mem_resource> alloc(new allocator_sorted_list(3000, nullptr,
+    std::unique_ptr<smart_mem_resource> alloc(new allocator_sorted_list(3000,
                                                             allocator_with_fit_mode::fit_mode::the_worst_fit));
     
     auto first_block = reinterpret_cast<int *>(alloc->allocate(sizeof(int) * 250));
@@ -38,7 +38,7 @@ TEST(allocatorSortedListPositiveTests, test2)
 
 TEST(allocatorSortedListPositiveTests, test3)
 {
-    std::unique_ptr<smart_mem_resource> allocator(new allocator_sorted_list(5000, nullptr, allocator_with_fit_mode::fit_mode::first_fit));
+    std::unique_ptr<smart_mem_resource> allocator(new allocator_sorted_list(5000, allocator_with_fit_mode::fit_mode::first_fit));
     
     int iterations_count = 100;
     
@@ -84,7 +84,7 @@ TEST(allocatorSortedListPositiveTests, test3)
 
 TEST(allocatorSortedListPositiveTests, test4)
 {
-    std::unique_ptr<smart_mem_resource> alloc(new allocator_sorted_list(1000, nullptr, allocator_with_fit_mode::fit_mode::first_fit));
+    std::unique_ptr<smart_mem_resource> alloc(new allocator_sorted_list(5000, allocator_with_fit_mode::fit_mode::first_fit));
     
     auto first_block = reinterpret_cast<unsigned char *>(alloc->allocate(sizeof(unsigned char) * 250));
     auto second_block = reinterpret_cast<unsigned char *>(alloc->allocate(sizeof(char) * 150));
@@ -106,7 +106,7 @@ TEST(allocatorSortedListPositiveTests, test4)
 
 TEST(allocatorSortedListPositiveTests, test5)
 {
-    std::unique_ptr<smart_mem_resource> alloc(new allocator_sorted_list(3000, nullptr, allocator_with_fit_mode::fit_mode::first_fit));
+    std::unique_ptr<smart_mem_resource> alloc(new allocator_sorted_list(5000, allocator_with_fit_mode::fit_mode::first_fit));
     
     auto first_block = reinterpret_cast<int *>(alloc->allocate(sizeof(char) * 250));
     auto second_block = reinterpret_cast<char *>(alloc->allocate(sizeof(char) * 500));
@@ -114,7 +114,7 @@ TEST(allocatorSortedListPositiveTests, test5)
     alloc->deallocate(first_block, 1);
     first_block = reinterpret_cast<int *>(alloc->allocate(sizeof(char) * 245));
 
-    std::unique_ptr<smart_mem_resource> allocator(new allocator_sorted_list(7500, nullptr, allocator_with_fit_mode::fit_mode::first_fit));
+    std::unique_ptr<smart_mem_resource> allocator(new allocator_sorted_list(5000, allocator_with_fit_mode::fit_mode::first_fit));
     auto *the_same_subject = dynamic_cast<allocator_with_fit_mode *>(allocator.get());
     int iterations_count = 10000;
     
@@ -175,8 +175,8 @@ TEST(allocatorSortedListPositiveTests, test5)
 
 TEST(allocatorSortedListNegativeTests, test1)
 {
-    std::unique_ptr<smart_mem_resource> alloc(new allocator_sorted_list(3000, nullptr, allocator_with_fit_mode::fit_mode::first_fit));
-    
+    std::unique_ptr<smart_mem_resource> alloc(new allocator_sorted_list(3000, allocator_with_fit_mode::fit_mode::first_fit));
+
     ASSERT_THROW(alloc->allocate(sizeof(char) * 3100), std::bad_alloc);
 }
 

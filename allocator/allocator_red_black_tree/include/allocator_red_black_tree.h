@@ -12,7 +12,14 @@ class allocator_red_black_tree final:
     public allocator_with_fit_mode
 {
 
-private:
+public:
+
+    static constexpr size_t block_alignment = alignof(std::max_align_t);
+
+    static constexpr size_t align_up(size_t size, size_t alignment) noexcept
+    {
+        return (size + alignment - 1) & ~(alignment - 1);
+    }
 
     enum class block_color : unsigned char
     { RED, BLACK };
@@ -23,50 +30,56 @@ private:
         block_color color : 4;
     };
 
+    static constexpr size_t block_size_offset = (sizeof(block_data) + alignof(size_t) - 1) & ~(alignof(size_t) - 1);
+    static constexpr size_t block_pointers_offset = (block_size_offset + sizeof(size_t) + alignof(void*) - 1) & ~(alignof(void*) - 1);
+    static constexpr size_t allocator_metadata_size = (sizeof(allocator_dbg_helper*) + sizeof(fit_mode) + sizeof(size_t) + sizeof(std::mutex) + sizeof(void*) + block_alignment - 1) & ~(block_alignment - 1);
+    static constexpr size_t occupied_block_metadata_size = (block_pointers_offset + 2 * sizeof(void*) + block_alignment - 1) & ~(block_alignment - 1);
+    static constexpr size_t free_block_metadata_size = (block_pointers_offset + 5 * sizeof(void*) + block_alignment - 1) & ~(block_alignment - 1);
+
+private:
+
     void *_trusted_memory;
 
-    static constexpr const size_t allocator_metadata_size = sizeof(allocator_dbg_helper*) + sizeof(fit_mode) + sizeof(size_t) + sizeof(std::mutex) + sizeof(void*);
-    static constexpr const size_t occupied_block_metadata_size = sizeof(block_data) + 3 * sizeof(void*);
-    static constexpr const size_t free_block_metadata_size = sizeof(block_data) + 5 * sizeof(void*);
-
 public:
-    
+
     ~allocator_red_black_tree() override;
-    
+
     allocator_red_black_tree(
         allocator_red_black_tree const &other);
-    
+
     allocator_red_black_tree &operator=(
         allocator_red_black_tree const &other);
-    
+
     allocator_red_black_tree(
         allocator_red_black_tree &&other) noexcept;
-    
+
     allocator_red_black_tree &operator=(
         allocator_red_black_tree &&other) noexcept;
 
 public:
-    
+
     explicit allocator_red_black_tree(
             size_t space_size,
             std::pmr::memory_resource *parent_allocator = nullptr,
             allocator_with_fit_mode::fit_mode allocate_fit_mode = allocator_with_fit_mode::fit_mode::first_fit);
 
+    std::vector<allocator_test_utils::block_info> get_blocks_info() const override;
+
+    void set_fit_mode(allocator_with_fit_mode::fit_mode mode) override;
+
 private:
-    
+
     [[nodiscard]] void *do_allocate_sm(
         size_t size) override;
-    
+
+    [[nodiscard]] void *do_allocate_sm(
+        size_t size,
+        size_t alignment) override;
+
     void do_deallocate_sm(
         void *at) override;
 
     bool do_is_equal(const std::pmr::memory_resource&) const noexcept override;
-
-    std::vector<allocator_test_utils::block_info> get_blocks_info() const override;
-    
-    inline void set_fit_mode(allocator_with_fit_mode::fit_mode mode) override;
-
-private:
 
     std::vector<allocator_test_utils::block_info> get_blocks_info_inner() const override;
 
@@ -89,7 +102,7 @@ private:
 
         rb_iterator& operator++() & noexcept;
 
-        rb_iterator operator++(int n);
+        rb_iterator operator++(int);
 
         size_t size() const noexcept;
 
@@ -99,7 +112,7 @@ private:
 
         rb_iterator();
 
-        rb_iterator(void* trusted);
+        rb_iterator(void* block_ptr, void* trusted_memory);
     };
 
     friend class rb_iterator;

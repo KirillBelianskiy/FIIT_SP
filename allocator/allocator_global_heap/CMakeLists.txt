@@ -7,13 +7,11 @@ add_library(
 target_include_directories(
         sys_prog_allctr_allctr_glbl_hp
         PUBLIC
-        ./include)
+        ./include
+        ../allocator/include)
 
 target_link_libraries(
         sys_prog_allctr_allctr_glbl_hp
         PUBLIC
-        sys_prog_cmmn)
-target_link_libraries(
-        sys_prog_allctr_allctr_glbl_hp
-        PUBLIC
+        sys_prog_cmmn
         sys_prog_allctr_allctr)

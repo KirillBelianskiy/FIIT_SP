@@ -1,6 +1,17 @@
 #include <not_implemented.h>
 #include "../include/allocator_global_heap.h"
 
+namespace {
+    allocator_global_heap& get_default_allocator() {
+        static allocator_global_heap instance;
+        return instance;
+    }
+}
+
+allocator_global_heap& allocator_global_heap::get_instance() {
+    return get_default_allocator();
+}
+
 [[nodiscard]] void* allocator_global_heap::do_allocate_sm(size_t size)
 {
         std::lock_guard<std::mutex> lock(_mutex);

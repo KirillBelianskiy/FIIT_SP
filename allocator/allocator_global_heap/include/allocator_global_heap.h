@@ -17,23 +17,25 @@ private:
     std::mutex _mutex;
 
 public:
-    
+
     explicit allocator_global_heap() = default;
-    
+
     ~allocator_global_heap() override = default;
-    
+
     allocator_global_heap(
         allocator_global_heap const &other) = delete;
-    
+
     allocator_global_heap &operator=(
         allocator_global_heap const &other) = delete;
-    
+
     allocator_global_heap(
         allocator_global_heap &&other) noexcept = delete;
-    
+
     allocator_global_heap &operator=(
         allocator_global_heap &&
         other) noexcept = delete;
+
+    static allocator_global_heap& get_instance();
 
 private:
     
